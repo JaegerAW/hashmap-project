@@ -3,6 +3,17 @@ class HashMap {
     this.keyMap = new Array(size);
   }
 
+  _rehash(key) {
+    // we need a rehash function that acts exactly like hash, but with new keyMap size;
+    let total = 0;
+    const weirdPrime = 31;
+    for (let i = 0; i < Math.min(100, key.length); i++) {
+      let char = key[i];
+      let value = char.charCodeAt(0) - 96;
+      total = (total * weirdPrime + value) % (this.keyMap.length * 2);
+    }
+    return total;
+  }
   _hash(key) {
     let total = 0;
     const weirdPrime = 31;
@@ -12,6 +23,28 @@ class HashMap {
       total = (total * weirdPrime + value) % this.keyMap.length;
     }
     return total;
+  }
+  resize() {
+    const newTable = new Array(this.keyMap.length * 2 + 7);
+    this.keyMap.forEach((item) => {
+      item.forEach(([key, value]) => {
+        const index = this._rehash(key);
+        if (!newTable[index]) {
+          newTable[index] = [];
+        }
+        if (item.includes([key, value])) {
+          for (let i = 0; i < newTable[index].length; i++) {
+            if (newTable[index][i][0] === key) {
+              //update value
+              newTable[index][i][1] = value;
+            }
+          }
+        } else {
+          newTable[index].push([key, value]);
+        }
+      });
+    });
+    this.keyMap = newTable;
   }
 
   set(key, value) {
@@ -27,6 +60,10 @@ class HashMap {
       }
     }
     this.keyMap[index].push([key, value]);
+    const loadFactor = this.length() / this.keyMap.length;
+    if (loadFactor > 0.8) {
+      this.resize();
+    }
     return this.keyMap;
   }
 
@@ -150,3 +187,11 @@ tableOne.set("jaeger", "love");
 tableOne.set("suryana", "waifu");
 tableOne.set("suryanaa", "love");
 tableOne.set("suryanaaaa", "love");
+tableOne.set("apple", "red");
+tableOne.set("pineapple", "yellow");
+tableOne.set("orange", "tangy");
+tableOne.set("hello", "world");
+tableOne.set("chris", "pine");
+tableOne.set("chris1", "hem");
+tableOne.set("chriss2", "middleton");
+tableOne.set("chris43", "evans");
